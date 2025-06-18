@@ -1,0 +1,445 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, FlatList, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar } from 'react-native';
+
+
+const Stack = createNativeStackNavigator();
+
+const productos = [
+  {
+    id: '1',
+    nombre: 'Base maybelline ',
+    precio: 275.00,
+    imagen: 'https://bellisima.mx/cdn/shop/files/B0CTJ3LZVS.MAIN.jpg?v=1717719117',
+    reseñas: [5, 4, 4, 5],
+  },
+  {
+    id: '2',
+    nombre: 'mascara de pestañas prosa ',
+    precio: 79.99,
+    imagen: 'https://exotik.store/cdn/shop/products/set-completo-prosa-rimel-323328.jpg?v=1651799304',
+    reseñas: [3, 4, 5],
+  },
+  {
+    id: '3',
+    nombre: ' paleta de contornos pink up',
+    precio: 249.99,
+    imagen: 'https://http2.mlstatic.com/D_NQ_NP_777748-MLM72748682007_112023-O-paleta-de-contorno-de-rostro-basic-pink-up-contorno.webp',
+    reseñas: [5, 5, 5, 4],
+  },
+  {
+    id: '4',
+    nombre: 'Labial natura larga duracion',
+    precio: 229.49,
+    imagen: 'https://http2.mlstatic.com/D_NQ_NP_963850-MLM43723465857_102020-O-natura-una-lapiz-labial-mate-larga-duracion.webp',
+    reseñas: [4, 4, 3],
+  },
+  {
+    id: '4',
+    nombre: 'paleta de rubor Bissu',
+    precio: 129.99,
+    imagen: 'https://lunara.mx/cdn/shop/products/Bissu3.jpg?v=1679328486&width=1445',
+    reseñas: [4, 4, 3],
+  },{
+    id: '4',
+    nombre: 'Lip Oil Dior',
+    precio: 1300.00,
+    imagen: 'https://apgmakeupsolution.com/cdn/shop/files/dior-dior-addict-lip-glow-oil_20288560_45481127_2048.jpg?v=1746408677&width=1946',
+    reseñas: [4, 4, 3],
+  },{
+    id: '4',
+    nombre: 'Polvo traslucido Mary Key',
+    precio: 300.00,
+    imagen: 'https://pimg.amr.marykaycdn.com/HeroZoom/10004/10060182-Polvo%20Suelto%20Traslucido.jpg',
+    reseñas: [4, 4, 3],
+  },{
+    id: '4',
+    nombre: 'Fijador de maquillaje Mac',
+    precio: 280.49,
+    imagen: 'https://www.sephora.com.mx/on/demandware.static/-/Sites-masterCatalog_Sephora/es_MX/dw151ea239/images/hi-res/boletos/Edgar%20Ponce/MAC/773602642199.jpg',
+    reseñas: [4, 4, 3],
+  },{
+    id: '4',
+    nombre: 'Set de brochas de maquillaje',
+    precio: 599.49,
+    imagen: 'https://i5.walmartimages.com/asr/a303633a-1873-4982-9d24-f0eb94b0f86b.bf4e22bff95d0f84bec51504b7cf4a51.jpeg?odnHeight=612&odnWidth=612&odnBg=FFFFFF',
+    reseñas: [4, 4, 3],
+  },{
+    id: '4',
+    nombre: 'Paleta de sombras',
+    precio: 300.00,
+    imagen: 'https://www.maicao.cl/dw/image/v2/BDPM_PRD/on/demandware.static/-/Sites-masterCatalog_Chile/default/dwcfa3d8a5/images/large/545054-paleta-de-sombras-24-colores-disney-the-little-mermaid.jpg?sw=1000&sh=1000',
+    reseñas: [4, 4, 3],
+  },
+];
+
+function HomeScreen({ navigation }) {
+  const [carrito, setCarrito] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
+  const [menuAbierto, setMenuAbierto] = useState(false);
+
+  const agregarAlCarrito = (producto) => {
+    setCarrito([...carrito, producto]);
+    Alert.alert('✅ Producto agregado', `${producto.nombre} ha sido agregado al carrito.`);
+  };
+
+  const productosFiltrados = productos.filter((p) =>
+    p.nombre.toLowerCase().includes(busqueda.toLowerCase())
+  );
+
+  const promedioEstrellas = (reseñas) => {
+    const total = reseñas.reduce((sum, r) => sum + r, 0);
+    return Math.round(total / reseñas.length);
+  };
+
+  return (
+    <View style={[styles.container, { backgroundColor: '#fbd4df' }]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => setMenuAbierto(!menuAbierto)}>
+          <Text style={styles.menuIcon}>☰</Text>
+        </TouchableOpacity>
+        <Text style={styles.titulo}>🎀MAKEUP APP 🎀</Text>
+      </View>
+
+      {/* Menú lateral */}
+      {menuAbierto && (
+        <View style={styles.menuLateral}>
+          <View style={{ marginTop: 100 }}>
+            <TouchableOpacity onPress={() => setMenuAbierto(false)}>
+              <Text style={styles.menuItem}>Inicio</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => {
+              setMenuAbierto(false);
+              navigation.navigate('Carrito', { carrito, setCarrito });
+            }}>
+              <Text style={styles.menuItem}>🛒 Ir al carrito</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setMenuAbierto(false)}>
+              <Text style={styles.menuCerrar}>✖️ Cerrar menú</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      <ScrollView style={{ marginBottom: 60 }}>
+        {/* Buscador */}
+        <TextInput
+          style={styles.input}
+          placeholder="🔍 Buscar productos..."
+          value={busqueda}
+          onChangeText={setBusqueda}
+        />
+
+        {/* Productos destacados */}
+        <Text style={styles.subtitulo}>🔥 Productos destacados</Text>
+        <FlatList
+          data={productos}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Detalle', { producto: item, agregarAlCarrito })}
+              style={styles.destacadoCard}
+            >
+              <Image source={{ uri: item.imagen }} style={styles.imagenDestacada} />
+              <Text style={styles.nombre}>{item.nombre}</Text>
+              <Text>💲 {item.precio.toFixed(2)}</Text>
+              <View style={styles.estrellas}>
+                {Array(promedioEstrellas(item.reseñas))
+                  .fill()
+                  .map((_, i) => (
+                    <Text key={i}>⭐</Text>
+                  ))}
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+
+        {/* Todos los productos */}
+        <Text style={styles.subtitulo}>Todos los productos</Text>
+        <FlatList
+          data={productosFiltrados}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Detalle', { producto: item, agregarAlCarrito })}
+              style={styles.card}
+            >
+              <Image source={{ uri: item.imagen }} style={styles.imagen} />
+              <Text style={styles.nombre}>{item.nombre}</Text>
+              <Text>💲 {item.precio.toFixed(2)}</Text>
+              <View style={styles.estrellas}>
+                {Array(promedioEstrellas(item.reseñas))
+                  .fill()
+                  .map((_, i) => (
+                    <Text key={i}>⭐</Text>
+                  ))}
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      </ScrollView>
+
+      {/* Botón flotante carrito */}
+      <View style={styles.botonFijo}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Carrito', { carrito, setCarrito })}
+          style={styles.botonIrCarrito}
+        >
+          <Text style={styles.textoBoton}>🛒 Ver carrito ({carrito.length})</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+function CarritoScreen({ route, navigation }) {
+  const { carrito, setCarrito } = route.params;
+
+  const total = carrito.reduce((sum, item) => sum + item.precio, 0);
+
+  const eliminarDelCarrito = (index) => {
+    const nuevoCarrito = [...carrito];
+    nuevoCarrito.splice(index, 1);
+    setCarrito(nuevoCarrito);
+    Alert.alert('🗑️ Producto eliminado');
+  };
+
+  return (
+    <View style={[styles.container, { backgroundColor: '#f9f9f9' }]}>
+      <Text style={styles.subtitulo}>🛒 Carrito</Text>
+      <ScrollView style={{ marginBottom: 60 }}>
+        {carrito.length === 0 ? (
+          <Text style={{ textAlign: 'center' }}>El carrito está vacío.</Text>
+        ) : (
+          carrito.map((item, index) => (
+            <View key={index} style={styles.card}>
+              <Image source={{ uri: item.imagen }} style={styles.imagen} />
+              <Text style={styles.nombre}>{item.nombre}</Text>
+              <Text>💲 {item.precio.toFixed(2)}</Text>
+              <TouchableOpacity
+                onPress={() => eliminarDelCarrito(index)}
+                style={[styles.botonAgregar, { backgroundColor: 'red' }]}
+              >
+                <Text style={{ color: '#fff' }}>Eliminar</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
+        <View style={styles.carrito}>
+          <Text>🧾 Artículos: {carrito.length}</Text>
+          <Text>💰 Total: ${total.toFixed(2)}</Text>
+        </View>
+      </ScrollView>
+
+      {/* Botón flotante Comprar */}
+      <View style={styles.botonFijo}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Pago', { total })}
+          style={[styles.botonIrCarrito, { backgroundColor: '#28a745' }]}
+        >
+          <Text style={styles.textoBoton}>💳 Comprar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+
+function PagoScreen({ route }) {
+  const { total } = route.params;
+
+  const confirmarPago = (metodo) => {
+    Alert.alert('✅ Pago confirmado', `Has pagado $${total.toFixed(2)} con ${metodo}. ¡Gracias por tu compra!`);
+  };
+
+  return (
+    <View style={[styles.container, { backgroundColor: '#fbd4df' }]}>
+      <Text style={styles.subtitulo}>💳 Opciones de pago</Text>
+      <TouchableOpacity onPress={() => confirmarPago('Tarjeta de crédito')} style={styles.botonAgregar}>
+        <Text style={{ color: '#fff' }}>Tarjeta de crédito</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => confirmarPago('PayPal')} style={styles.botonAgregar}>
+        <Text style={{ color: '#fff' }}>PayPal</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => confirmarPago('Transferencia bancaria')} style={styles.botonAgregar}>
+        <Text style={{ color: '#fff' }}>Transferencia bancaria</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function DetalleProductoScreen({ route }) {
+  const { producto, agregarAlCarrito } = route.params;
+
+  const promedioEstrellas = (reseñas) => {
+    const total = reseñas.reduce((sum, r) => sum + r, 0);
+    return Math.round(total / reseñas.length);
+  };
+
+  return (
+    <ScrollView style={[styles.container, { backgroundColor: '#f9f9f9' }]}>
+      <Text style={styles.subtitulo}>{producto.nombre}</Text>
+      <Image source={{ uri: producto.imagen }} style={styles.imagen} />
+      <Text style={{ fontSize: 18, marginBottom: 10 }}>💲 {producto.precio.toFixed(2)}</Text>
+      <Text style={{ marginBottom: 10 }}>Descripción: Este producto es de muy buena calidad a un super precio, tenemos de todos los tonos y colores.</Text>
+      <Text style={styles.subtitulo}>⭐ Reseñas</Text>
+      <View style={styles.estrellas}>
+        {Array(promedioEstrellas(producto.reseñas))
+          .fill()
+          .map((_, i) => (
+            <Text key={i}>⭐</Text>
+          ))}
+      </View>
+      <View style={{ marginBottom: 20 }}>
+        {producto.reseñas.map((r, index) => (
+          <Text key={index}>⭐ {r} estrellas - ¡Muy buen producto!</Text>
+        ))}
+      </View>
+      <TouchableOpacity
+        onPress={() => agregarAlCarrito(producto)}
+        style={[styles.botonAgregar, { backgroundColor: '#28a745' }]}
+      >
+        <Text style={{ color: '#fff' }}>🛒 Agregar al carrito</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Inicio" component={HomeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Carrito" component={CarritoScreen} />
+        <Stack.Screen name="Pago" component={PagoScreen} />
+        <Stack.Screen name="Detalle" component={DetalleProductoScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {flex: 1,padding: 10,backgroundColor: '#fbd4df',},
+header: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  paddingTop: StatusBar.currentHeight || 40, 
+  height: 60 + (StatusBar.currentHeight || 40),
+  backgroundColor: '#fbd4df',
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingHorizontal: 10,
+  elevation: 5,
+  zIndex: 1000,
+},
+menuIcon: {
+  fontSize: 28,
+  position: '',
+  left: -100,
+},
+titulo: {
+  fontSize: 24,
+  fontWeight: 'bold',
+},
+  input: {
+    borderWidth: 1,
+    borderColor: '#eebbbb',
+    padding: 8,
+    marginBottom: 10,
+    borderRadius: 5,
+    marginTop: 100,
+
+
+  },
+  card: {
+    padding: 10,
+    marginBottom: 10,
+    backgroundColor: '#fbd4df',
+    borderRadius: 5,
+    elevation: 2,
+  },
+  imagen: {
+    width: '100%',
+    height: 200,
+    marginBottom: 5,
+  },
+  imagenDestacada: {
+    width: 120,
+    height: 120,
+    marginBottom: 5,
+  },
+  nombre: {
+    fontWeight: 'bold',
+  },
+  botonAgregar: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  subtitulo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  carrito: {
+    padding: 10,
+    backgroundColor: '#eebbbb',
+    marginTop: 10,
+  },
+  botonFijo: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    right: 10,
+  },
+  botonIrCarrito: {
+    backgroundColor: '#ff5aa4',
+    padding: 15,
+    borderRadius: 30,
+    alignItems: 'center',
+  },
+  textoBoton: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  destacadoCard: {
+    padding: 10,
+    marginRight: 10,
+    backgroundColor: '#fbd4df',
+    borderRadius: 5,
+    elevation: 2,
+    width: 140,
+  },
+  menuLateral: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: 200,
+    height: '100%',
+    backgroundColor: '#ff96c5',
+    padding: 10,
+    zIndex: 999,
+    elevation: 5,
+  },
+  menuItem: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  menuCerrar: {
+    fontSize: 16,
+    color: 'red',
+  },
+  estrellas: {
+    flexDirection: 'row',
+    marginVertical: 5,
+  },
+});
